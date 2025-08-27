@@ -1,6 +1,10 @@
 # dandrake.github.io
 
-I am testing github pages and seeing how it works.
+My github pages page.
+
+## Comp 127 syllabus
+
+[Course syllabus for Comp 127 fall 2025](2025-fall-127/syllabus.html)
 
 ## workflow wizard walkthrough
 
