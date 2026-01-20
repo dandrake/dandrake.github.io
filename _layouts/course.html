@@ -1,0 +1,28 @@
+---
+layout: default
+---
+
+<article class="course">
+    <div class="course-header">
+        <h1>{{ page.title }}</h1>
+        {% if page.semester %}
+            <p class="semester">{{ page.semester }}</p>
+        {% endif %}
+        {% if page.meeting_time %}
+            <p class="meeting-info">{{ page.meeting_time }} | {{ page.location }}</p>
+        {% endif %}
+    </div>
+
+    {% if page.course_nav %}
+    <nav class="course-nav">
+        <a href="{{ page.course_url }}">Home</a>
+        <a href="{{ page.course_url }}/syllabus">Syllabus</a>
+        <a href="{{ page.course_url }}/schedule">Schedule</a>
+        <a href="{{ page.course_url }}/assignments">Assignments</a>
+    </nav>
+    {% endif %}
+
+    <div class="course-content">
+        {{ content }}
+    </div>
+</article>
