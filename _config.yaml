@@ -1,6 +1,6 @@
 remote_theme: pages-themes/minimal@v0.2.0
 theme: jekyll-theme-minimal
-title: "dandrake.github.io"
+title: "Dan Drake"
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 collections:
@@ -10,11 +10,16 @@ collections:
   cs101:
     output: true
     permalink: /courses/cs101/:name/
-  "112": # need the quotes, Jekyll collections must be strings and
+  # need the quotes, Jekyll collections must be strings and
   # without quotes, Ruby types it as a string -> downstream string
   # methods fail
+  "112":
     output: true
-    permalink: /courses/2026-1-spring/1122_intro_to_data_sci/:name/
+    permalink: /courses/2026-1-spring/112_intro_to_data_sci/:name/
+  "123":
+    output: true
+    permalink: /courses/2026-1-spring/123_core_concepts_of_cs/:name/
+
   cs202:
     output: true
     permalink: /courses/cs202/:name/
