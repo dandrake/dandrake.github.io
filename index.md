@@ -1,3 +1,8 @@
+---
+layout: default
+title: dandrake.github.io
+---
+
 My unexciting github pages page.
 
 ## COMP/STAT 112, Introduction to Data Science, spring 2026

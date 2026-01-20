@@ -1,0 +1,10 @@
+collections:
+  assignments:
+    output: true
+    permalink: /courses/:path/
+  cs101:
+    output: true
+    permalink: /courses/cs101/:name/
+  cs202:
+    output: true
+    permalink: /courses/cs202/:name/
