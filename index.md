@@ -1,12 +1,13 @@
 ---
 layout: default
-theme: hacker
 title: dandrake.github.io
 ---
 
 My unexciting github pages page.
 
-## COMP/STAT 112, Introduction to Data Science, spring 2026
+## courses I'm teaching
+
+### COMP/STAT 112, Introduction to Data Science, spring 2026
 
 See the [course website](https://dandrake.github.io/112_spring_2026/).
 
