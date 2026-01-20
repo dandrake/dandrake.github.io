@@ -5,7 +5,7 @@ semester: Spring 2026
 meeting_time: MWF 8:00, 9:40
 location: OLRI whatever
 course_nav: true
-course_url: /courses/2026-1-spring/123_core_concepts_of_cs
+course_url: /courses/2026-1-spring/123_core_concepts_in_cs
 ---
 
 ## Welcome to COMP 123
