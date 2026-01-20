@@ -1,3 +1,8 @@
 * dandrake.github.io
 
-[[https://claude.ai/chat/ba229bb9-cb48-41df-84ba-c6a9cf40ca7b][Claude chat on Jekyll setup]]
+** [[https://claude.ai/chat/ba229bb9-cb48-41df-84ba-c6a9cf40ca7b][Claude chat on Jekyll setup]]
+
+** Ruby, Gem setup
+
+See [[https://codeberg.org/pcantrell/comp127-course-site#local-installation][Paul's ssg README]] for local installation. Key thing seems to be
+having ~rbenv~ working and a suitable ~.ruby-version~.
