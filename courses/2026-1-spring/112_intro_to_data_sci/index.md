@@ -1,6 +1,6 @@
 ---
 layout: course
-title: STAT/COMP 112: Introduction to Data Science
+title: "STAT/COMP 112: Introduction to Data Science"
 semester: Spring 2026
 meeting_time: TR 9:40
 location: OLRI 254

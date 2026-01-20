@@ -1,6 +1,6 @@
 ---
 layout: course
-title: COMP 123 - Core Concepts in Computer Science
+title: "COMP 123: Core Concepts in Computer Science"
 semester: Spring 2026
 meeting_time: MWF 8:00, 9:40
 location: OLRI whatever
