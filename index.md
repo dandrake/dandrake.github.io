@@ -11,6 +11,10 @@ My unexciting github pages page.
 
 See the [course website](https://dandrake.github.io/112_spring_2026/).
 
+### COMP 123, Core Concepts in Computer Science, spring 2026
+
+Almost everything for this course is on Moodle, but the [syllabus is here](courses/2026-1-spring/123_core_concepts_in_cs/syllabus.html).
+
 ## workflow wizard walkthrough for Visual Studio + Java + Git installation
 
 [See the live page](workflow-wizard-walkthrough/) for [this repo](https://github.com/dandrake/workflow-wizard-walkthrough).
