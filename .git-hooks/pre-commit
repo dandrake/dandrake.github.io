@@ -12,21 +12,44 @@ MD="/Users/ddrake1/google_drive/My Drive/teaching/2026-1-spring/123/$SRC"
 
 if [ "$MD" -nt "$HTML" ]
 then
-    echo markdown is newer
-    echo ---------
-    printf "$SRC is newer than $DEST. Proceed with commit? "
-    read -r CONTINUE
-    if [ $CONTINUE = "y" ]
+    # is it staged for commit?
+    STAGED=$(git status --porcelain=v2 | rg "$DEST" | rg '1 M')
+    if [ -n "$STAGED" ]
     then
-        echo yes
-        exit 0
+        echo ================================================================
+        # this gets run from inside a git process, so it doesn't have
+        # the stdin/stdout you would expect, need to explicitly ask for tty
+        read -p "$SRC is newer than $DEST. Proceed with commit? " -n 1 -r < /dev/tty
+        echo
+        if [ "z$REPLY" = "zy" ]
+        then
+            exit 0
+        else
+            echo Do:
+            echo " cd $(dirname \"$MD\")"
+            echo " make $DEST && make publish"
+            echo
+            exit 1
+        fi
     else
-        echo Do:
-        echo cd $(dirname $MD)
-        echo make $DEST
-        echo make publish
+        echo ================================================================
+        echo $SRC is newer than $DEST, and $DEST is NOT staged!
+        read -p "Proceed with commit? " -n 1 -r < /dev/tty
+        echo
+        if [ "z$REPLY" = "zy" ]
+        then
+            exit 0
+        else
+            echo Do:
+            echo " cd $(dirname \"$MD\")"
+            echo " make $DEST && make publish"
+            echo Then git add $DEST in this repo.
+            exit 1
+        fi
+
         exit 1
     fi
 else
-    echo markdown is NOT newer
+    echo markdown is NOT newer should be okay, fix exit code
+    exit 1
 fi
