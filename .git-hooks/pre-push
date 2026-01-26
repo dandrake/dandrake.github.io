@@ -1,0 +1,30 @@
+#!/bin/sh
+
+
+
+SRC=syllabus.md
+# POSIX-compliant substitution -- ${SRC//md/html} is zsh/bash-specific
+DEST=${SRC%md}html
+
+HTML="courses/2026-1-spring/123_core_concepts_in_cs/$DEST"
+
+MD="/Users/ddrake1/google_drive/My Drive/teaching/2026-1-spring/123/$SRC"
+
+if [ "$MD" -nt "$HTML" ]
+then
+    read -p "$SRC is newer than $DEST. Proceed with push? " -n 1 -r < /dev/tty
+    echo
+    if [ "z$REPLY" = "zy" ]
+    then
+        exit 0
+    else
+        echo Do:
+        echo " cd $(dirname \"$MD\")"
+        echo " make $DEST && make publish"
+        echo then commit it here
+        exit 1
+    fi
+else
+    echo $HTML is up to date, proceeding with push
+    exit 0
+fi

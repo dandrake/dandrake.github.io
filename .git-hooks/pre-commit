@@ -50,6 +50,6 @@ then
         exit 1
     fi
 else
-    echo markdown is NOT newer should be okay, fix exit code
-    exit 1
+    echo $HTML is up to date, proceeding with commit
+    exit 0
 fi
