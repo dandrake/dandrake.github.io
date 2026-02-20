@@ -3,7 +3,9 @@ layout: default
 title: dandrake.github.io
 ---
 
-My unexciting github pages page.
+I teach computer science and data science courses at [Macalester College](https://www.macalester.edu/). I have a PhD in math and spent many years as a math professor and hope to get back to teaching those courses again...
+
+[Here's my CV](dan-drake-cv.pdf)
 
 ## courses I'm teaching
 
