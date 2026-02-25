@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parsons Problems - Python Loops</title>
+    <style>body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  color: #2c3e50;
+  text-align: center;
+}
+
+.instructions {
+  text-align: center;
+  color: #666;
+}
+
+.problem {
+  background: white;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.problem h2 {
+  color: #3498db;
+  margin-top: 0;
+}
+
+.task {
+  background-color: #e8f4f8;
+  padding: 15px;
+  border-left: 4px solid #3498db;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.code-area {
+  min-height: 200px;
+  background-color: #f8f9fa;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.code-area h3 {
+  margin-top: 0;
+  color: #555;
+  font-size: 14px;
+  text-transform: uppercase;
+  pointer-events: none; /* so you can't drop code lines onto the h3 */
+}
+
+.code-line {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 5px 0;
+  cursor: move;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  transition: background-color 0.2s;
+}
+
+.code-line:hover {
+  background-color: #e3f2fd;
+}
+
+.code-line.dragging {
+  opacity: 0.5;
+}
+
+.code-line.keyboard-selected {
+  outline: 2px solid #3498db;
+  background-color: #cce5ff;
+}
+
+.code-line.distractor {
+  border-left: 3px solid #e74c3c;
+}
+
+.solution-area {
+  background-color: #f0f0f0;
+}
+
+.indent-1 {
+  padding-left: 30px;
+}
+
+.indent-2 {
+  padding-left: 60px;
+}
+
+.indent-3 {
+  padding-left: 90px;
+}
+
+button {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #229954;
+}
+
+button.reset {
+  background-color: #95a5a6;
+  margin-left: 10px;
+}
+
+button.reset:hover {
+  background-color: #7f8c8d;
+}
+
+.feedback {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 4px;
+  display: none;
+}
+
+.feedback.correct {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  display: block;
+}
+
+.feedback.incorrect {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  display: block;
+}
+</style>
+  </head>
+  <body>
+    <h1>Parsons Problems</h1>
+    <p class="instructions">
+      Drag and drop the code lines into the correct order. You may not need to
+      use all the lines!
+    </p>
+
+    <div id="problems-container"></div>
+
+    <script>/*
+
+This is where you define problems and tell the page which of them to show.
+
+Add your functions to the `problems` list below; the structure should
+be reasonably clear. Read some of the comments there to see how to add
+additional solutions and other things.
+
+Then, you tell the page which of the problems to actually show --
+that's right at the bottom. Put in a list of problems, or just use the
+code there to show all of them.
+
+*/
+
+// Convenience function for input of the correct solution: converts
+// mult-line string to the "lines" list of objects used below.
+//
+// Indentation is determined by counting leading spaces (4 spaces = 1
+// level); tabs are ignored. All lines are marked "correct: true" with
+// sequential indices. Blank lines are skipped.
+function solutionToLines(codeLines) {
+  return codeLines
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line, index) => {
+      const indentLevel = Math.floor(
+        (line.length - line.trimStart().length) / 4,
+      );
+      return {
+        code: line.trimStart(),
+        indent: indentLevel,
+        correct: true,
+        index: index,
+      };
+    });
+}
+
+// companion to the above:
+function distractorsToLines(codeLines) {
+  //  the index property can be omitted, but it's ignored if present.
+  //  Just need to properly set correct to false.
+
+  // spread operator "pastes in" the existing keys, then we override the one we care about
+  return solutionToLines(codeLines).map((item) => ({ ...item, correct: false }));
+}
+
+//
+// ENTER YOUR PROBLEMS HERE
+//
+// You can use any key that works as both an HTML id and JavaScript
+// identifier for the problem's key.
+
+const problems = {
+  quiz2sample: {
+    title: "Repeat based on index",
+    task: "Arrange the lines for the 'stretch' function: it takes a string and returns a new string where each character is repeated a number of times equal to its position (1-indexed). For example, stretch(\"abc\") returns \"abbccc\"",
+    lines: [ ...solutionToLines(`
+def stretch(s):
+    result = ""
+    for i in range(len(s)):
+        result = result + s[i] * (i + 1)
+    return result
+`),
+              ...distractorsToLines(`
+result = ""
+        result = result + s[i] * i
+    for ch in s:
+        result = result + ch * (i + 1)
+`)
+
+            ],
+  },
+
+  foo: {
+    title: "Smallest power of 2 greater than 1000",
+    task: "Arrange the lines so that after the loop exits, <code>power</code> is the smallest power of 2 -- a number of the form 2<sup>n</sup> -- greater than 1000.",
+    lines: [
+      ...solutionToLines(`
+power = 1
+while power <= 1000:
+    power = power * 2
+print(power)
+      `),
+      { code: "while power < 1000:", indent: 0, correct: false },
+      { code: "power = power + 2", indent: 1, correct: false },
+      { code: "print(power)", indent: 1, correct: false },
+    ],
+  },
+
+  1: {
+    title: "Problem 1: Countdown",
+    task: 'Arrange the lines to create a countdown from 5 to 1, then print "Blastoff!"',
+    hint: "hey it's a hint",
+    lines: [
+      { code: "for i in range(5, 0, -1):", indent: 0, correct: true, index: 0 },
+      { code: "print(i)", indent: 1, correct: true, index: 1 },
+      { code: 'print("Blastoff!")', indent: 0, correct: true, index: 2 },
+      { code: "for i in range(5, 0):", indent: 0, correct: false },
+      { code: "for i in range(1, 5):", indent: 0, correct: false, index: 5 },
+    ],
+    // if there are additional solutions, add a list of lists of indices below;
+    // the above default solution defined by correct: true and 'index'
+    // is always considered.
+    //
+    // additionalSolutions = [ [0, 5, 3], [1, 0, 2, 4] ],
+  },
+
+  2: {
+    title: "Problem 2: Sum of Numbers",
+    task: "Arrange the lines to calculate the sum of numbers from 1 to 10",
+    lines: [
+      { code: "total = 0", indent: 0, correct: true, index: 0 },
+      { code: "for num in range(1, 11):", indent: 0, correct: true, index: 1 },
+      { code: "total = total + num", indent: 1, correct: true, index: 2 },
+      { code: "print(total)", indent: 0, correct: true, index: 3 },
+      { code: "total = 1", indent: 0, correct: false },
+      { code: "for num in range(1, 10):", indent: 0, correct: false },
+      { code: "total = num", indent: 1, correct: false },
+    ],
+    hint: "start with zero",
+  },
+  3: {
+    title: "Problem 3: Print Even Numbers",
+    task: "Arrange the lines to print only the even numbers from 0 to 10",
+    lines: [
+      { code: "for number in range(11):", indent: 0, correct: true, index: 0 },
+      { code: "if number % 2 == 0:", indent: 1, correct: true, index: 1 },
+      { code: "print(number)", indent: 2, correct: true, index: 2 },
+      { code: "if number % 2 == 1:", indent: 1, correct: false },
+      { code: "if number / 2 == 0:", indent: 1, correct: false },
+    ],
+    hint: "hint hint hint",
+  },
+
+  4: {
+    title: "Turtle check",
+    task: `<p>Arrange the lines to make the checkmark shown here.</p>
+             <img src="images/turtle_checkmark.png" width="200px" />`,
+    lines: [
+      { code: "import turtle", indent: 0, correct: true, index: 0 },
+      { code: "maria = turtle.Turtle()", indent: 0, correct: true, index: 1 },
+      { code: "window = turtle.Screen()", indent: 0, correct: true, index: 2 },
+      { code: "maria.right(45)", indent: 0, correct: true, index: 3 },
+      { code: "maria.forward(75)", indent: 0, correct: true, index: 4 },
+      { code: "maria.left(90)", indent: 0, correct: true, index: 5 },
+      { code: "maria.forward(150)", indent: 0, correct: true, index: 6 },
+      { code: "maria.rotate(45)", indent: 0, correct: false },
+      { code: "maria.rotate(-90)", indent: 0, correct: false },
+      { code: 'maria.face("southeast")', indent: 0, correct: false },
+      { code: 'maria.face("northeast")', indent: 0, correct: false },
+    ],
+    hint: "In what direction does Maria start? How should she turn from there?",
+    additionalSolutions: [[0, 2, 1, 3, 4, 5, 6]],
+  },
+};
+
+function getSolution(problemNum) {
+  const problem = problems[problemNum];
+  // list of indices of correct solutions. Start with the "canonical"
+  // one from the definition:
+
+  let solutions = [
+    problems[problemNum].lines
+      .filter((line) => line.correct)
+      .sort((a, b) => a.index - b.index)
+      .map((line) => line.index),
+  ];
+
+  // if you want the correct code as an array of strings, just use the
+  // above, but with line.code on the final map().
+
+  // when there's more...
+  if (problem.additionalSolutions) {
+    solutions.push(...problem.additionalSolutions);
+  }
+
+  return solutions.map((solution) =>
+    solution.map(
+      (i) => problem.lines.filter((line) => line.index === i)[0].code,
+    ),
+  );
+}
+
+function createProblemHTML(num) {
+  const container = document.getElementById("problems-container");
+  const problemDiv = document.createElement("div");
+  problemDiv.className = "problem";
+  problemDiv.innerHTML = `
+        <h2>${problems[num].title}</h2>
+        <div class="task">
+            <strong>Task:</strong> ${problems[num].task}
+        </div>
+        <div class="columns">
+            <div class="code-area" id="available-${num}">
+                <h3>Available Lines</h3>
+            </div>
+            <div class="code-area solution-area" id="solution-${num}">
+                <h3>Your Solution (drop here)</h3>
+            </div>
+        </div>
+        <button onclick="checkSolution('${num}')">Check Solution</button>
+        <button class="reset" onclick="resetProblem('${num}')">Reset</button>
+        <div class="feedback" id="feedback-${num}"></div>
+    `;
+  container.appendChild(problemDiv);
+}
+
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function initializeProblem(num) {
+  const availableArea = document.getElementById(`available-${num}`);
+  const h3 = availableArea.querySelector("h3");
+  availableArea.innerHTML = "";
+  availableArea.appendChild(h3);
+
+  const shuffledLines = shuffle(problems[num].lines);
+
+  shuffledLines.forEach((line, index) => {
+    const div = document.createElement("div");
+    /* not sure why the chatbot highlights distractor lines!
+
+         could use this, though, as a hint: after 1 or 2 mistakes,
+         highlight so the student only needs to deal with correct
+         ones...then maybe ultimately show the answer.
+
+         div.className = 'code-line' + (line.correct ? '' : ' distractor') + (line.indent > 0 ? ` indent-${line.indent}` : '');
+         */
+    div.className =
+      "code-line" + (line.indent > 0 ? ` indent-${line.indent}` : "");
+    div.textContent = line.code;
+    div.draggable = true;
+    div.dataset.code = line.code;
+    div.dataset.id = `${num}-${index}`;
+
+    div.tabIndex = 0;
+    div.addEventListener("dragstart", handleDragStart);
+    div.addEventListener("dragend", handleDragEnd);
+    div.addEventListener("keydown", handleKeyDown);
+
+    availableArea.appendChild(div);
+  });
+}
+
+function setupDropZones() {
+  document.querySelectorAll(".code-area").forEach((area) => {
+    area.addEventListener("dragover", handleDragOver);
+    area.addEventListener("drop", handleDrop);
+  });
+}
+
+let draggedElement = null;
+let keyboardSelected = null;
+
+function deselectKeyboard() {
+  if (keyboardSelected) {
+    keyboardSelected.classList.remove("keyboard-selected");
+    keyboardSelected = null;
+  }
+}
+
+function handleKeyDown(e) {
+  const line = e.currentTarget;
+  const num = line.dataset.id.split("-")[0];
+
+  if (e.key === " ") {
+    e.preventDefault();
+    if (keyboardSelected === line) {
+      deselectKeyboard();
+    } else if (keyboardSelected) {
+      line.parentNode.insertBefore(keyboardSelected, line);
+      deselectKeyboard();
+      line.focus();
+    } else {
+      keyboardSelected = line;
+      line.classList.add("keyboard-selected");
+    }
+  } else if (e.key === "ArrowUp" && keyboardSelected === line) {
+    e.preventDefault();
+    const prev = line.previousElementSibling;
+    if (prev?.classList.contains("code-line")) {
+      line.parentNode.insertBefore(line, prev);
+      line.focus();
+    }
+  } else if (e.key === "ArrowDown" && keyboardSelected === line) {
+    e.preventDefault();
+    const next = line.nextElementSibling;
+    if (next?.classList.contains("code-line")) {
+      next.after(line);
+      line.focus();
+    }
+  } else if (
+    (e.key === "ArrowRight" || e.key === "Enter") &&
+    keyboardSelected === line
+  ) {
+    e.preventDefault();
+    document.getElementById(`solution-${num}`).appendChild(line);
+    deselectKeyboard();
+    line.focus();
+  } else if (e.key === "ArrowLeft" && keyboardSelected === line) {
+    e.preventDefault();
+    document.getElementById(`available-${num}`).appendChild(line);
+    deselectKeyboard();
+    line.focus();
+  } else if (e.key === "Escape") {
+    deselectKeyboard();
+  }
+}
+
+function handleDragStart(e) {
+  draggedElement = e.target;
+  e.target.classList
+    ? e.target.classList.add("dragging")
+    : (e.target.classList = ["dragging"]);
+  e.dataTransfer.effectAllowed = "move";
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove("dragging");
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = "move";
+  return false;
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+  e.preventDefault();
+
+  if (draggedElement && e.target.classList.contains("code-area")) {
+    e.target.appendChild(draggedElement);
+  } else if (draggedElement && e.target.classList.contains("code-line")) {
+    e.target.parentNode.insertBefore(draggedElement, e.target.nextSibling);
+  }
+
+  return false;
+}
+
+function checkSolution(num) {
+  const solutionArea = document.getElementById(`solution-${num}`);
+  const lines = Array.from(solutionArea.querySelectorAll(".code-line"));
+  const userSolution = lines.map((line) => line.dataset.code);
+  const correctSolutions = getSolution(num).map((solution) =>
+    JSON.stringify(solution),
+  );
+  const feedback = document.getElementById(`feedback-${num}`);
+
+  if (userSolution.length === 0) {
+    feedback.className = "feedback incorrect";
+    feedback.textContent = "Please drag some lines to the solution area first!";
+    return;
+  }
+
+  //if (JSON.stringify(userSolution) === JSON.stringify(correctSolution)) {
+  if (correctSolutions.includes(JSON.stringify(userSolution))) {
+    feedback.className = "feedback correct";
+    feedback.textContent = "✓ Correct! Great job!";
+  } else {
+    feedback.className = "feedback incorrect";
+    let feedbackString =
+      "✗ Not quite right. Try again! Make sure you have the lines in the correct order and haven't included any distractor lines.";
+    if (problems[num].hint) {
+      feedbackString += `<br><br><strong>Hint:</strong> ${problems[num].hint}`;
+    }
+    feedback.innerHTML = feedbackString;
+  }
+}
+
+function resetProblem(num) {
+  deselectKeyboard();
+  const solutionArea = document.getElementById(`solution-${num}`);
+  const h3 = solutionArea.querySelector("h3");
+  solutionArea.innerHTML = "";
+  solutionArea.appendChild(h3);
+
+  const feedback = document.getElementById(`feedback-${num}`);
+  feedback.className = "feedback";
+  feedback.textContent = "";
+
+  initializeProblem(num);
+}
+
+// Generate and initialize all problems:
+//Object.keys(problems).forEach((key) => {
+['quiz2sample'].forEach((key) => {
+  createProblemHTML(key);
+  initializeProblem(key);
+});
+
+// or give your own list:
+
+// [1, "foo", 2, ].forEach((key) => { ...
+
+setupDropZones();
+</script>
+  </body>
+</html>
