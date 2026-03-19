@@ -1,6 +1,8 @@
 # comment out remote theme on macOS; otherwise I seem to get SSL problems
 #remote_theme: pages-themes/minimal@v0.2.0
 theme: jekyll-theme-minimal
+exclude:
+  - ".#*"
 title: "Dan Drake"
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one

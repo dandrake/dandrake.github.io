@@ -6,3 +6,8 @@
 
 See [[https://codeberg.org/pcantrell/comp127-course-site#local-installation][Paul's ssg README]] for local installation. Key thing seems to be
 having ~rbenv~ working and a suitable ~.ruby-version~.
+* build and preview
+
+bundle exec install
+
+bundle exec jekyll serve
