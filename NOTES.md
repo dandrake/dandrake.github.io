@@ -4,7 +4,10 @@
 
 Jekyll-based personal/teaching website deployed to `dandrake.github.io` via GitHub Pages.
 
-**Theme:** `jekyll-theme-minimal` (GitHub Pages built-in), with two custom layouts in `_layouts/` — `page.html` (generic) and `course.html` (adds course header with title, semester, meeting time, location, and nav links).
+**Theme:** `jekyll-theme-minimal` (GitHub Pages built-in), with a local override of `default.html` and two other custom layouts in `_layouts/`:
+- `default.html` — copied from theme to add SVG background attribution in the footer
+- `page.html` — generic page layout
+- `course.html` — course-specific layout (title, semester, meeting time, location, nav links)
 
 ## Content Structure
 
@@ -34,7 +37,9 @@ Jekyll watches for changes and rebuilds automatically. Requires Ruby 3.4.5 (see 
 
 Custom styles live in `assets/css/style.scss`. This file overrides the theme's default stylesheet. It must start with empty front matter (`---`/`---`) for Jekyll to process it.
 
-Currently it imports the base theme and adds a background image (an SVG "endless constellation" pattern from SVGBackgrounds.com) as an inline data URI on `body`. To change the background, replace the `background-image` data URI or update `background-color`.
+Currently it imports the base theme and adds a background image (an SVG "endless constellation" pattern from SVGBackgrounds.com) as an inline data URI on `body`. The stroke and fill colors can be defined as SCSS variables at the top of the file. To change the background, replace the `background-image` data URI or update `background-color`. The `url()` value must be on a single line or it will break.
+
+**Important:** Emacs lock files (`.#filename`) will cause `jekyll serve` to fail. Close unsaved Emacs buffers or delete the lock files before building.
 
 ## How to Deploy
 

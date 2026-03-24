@@ -7,7 +7,7 @@ I teach computer science and data science courses at [Macalester College](https:
 
 [Here's my CV](dan-drake-cv.pdf)
 
-## courses I'm teaching
+## teaching
 
 ### COMP/STAT 112, Introduction to Data Science, spring 2026
 
@@ -26,3 +26,9 @@ Almost everything for this course is on Moodle, but the [syllabus is here](cours
 ### COMP 127 syllabus, fall 2025
 
 [Course syllabus for Comp 127 fall 2025](2025-fall-127/syllabus.html)
+
+## outreach
+
+### [AI for the Confused](outreach/ai_for_the_confused)
+
+A placeholder page which I'm posting in part to shame myself into actually writing that and describing the public outreach I'm doing...
