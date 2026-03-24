@@ -32,3 +32,15 @@ Almost everything for this course is on Moodle, but the [syllabus is here](cours
 ### [AI for the Confused](outreach/ai_for_the_confused)
 
 A placeholder page which I'm posting in part to shame myself into actually writing that and describing the public outreach I'm doing...
+
+## code projects
+
+More placeholders...
+
+### [Parsons Problems single page HTML](https://codeberg.org/ddrake/parsons_problem_page)
+
+A simple HTML/JavaScript web page for presenting Parsons problems, aimed to make it easy to produce a single, self-contained HTML file with Parsons problems for posting on the web, in your LMS, using in-class, and so on.
+
+### ["Launch PythonTutor with this code" bookmarklet](https://codeberg.org/ddrake/launch-in-pythontutor)
+
+Make it easy to use the [Python Tutor code visualizer](https://pythontutor.com): all you do is copy and paste in some code from the page you're looking at, or just use the selected text.
