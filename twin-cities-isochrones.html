@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Within Reach — Twin Cities Isochrones</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""
+  onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* --- palette: cool paper + slate ink; data carries all the color --- */
+    --paper:#e9edee;          /* cool off-white, not cream */
+    --paper-2:#f4f6f6;
+    --panel:#ffffff;
+    --ink:#1d2730;            /* cold slate, not black */
+    --ink-2:#48565f;
+    --ink-3:#7d8a91;
+    --line:#cdd6d8;
+    --line-2:#dde4e5;
+    --focus:#1d6b8c;
+
+    /* walking ramp: pine -> pale (5,10,15,20,25,30 min) */
+    --w1:#0c6e60; --w2:#2a8f7d; --w3:#58ad96; --w4:#8ac7b1; --w5:#bcdfcd; --w6:#e7f2ea;
+    /* cycling ramp: indigo -> pale */
+    --b1:#3a2c86; --b2:#5a4fb3; --b3:#7e72cf; --b4:#a69ddd; --b5:#cbc4ec; --b6:#ece8f8;
+
+    --rail-w:340px;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(29,39,48,.06), 0 12px 30px rgba(29,39,48,.10);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+    line-height:1.45;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+  /* ---------- shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:var(--rail-w) 1fr;
+    grid-template-rows:100%;
+    height:100%;
+    gap:14px;
+    padding:14px;
+  }
+
+  /* ---------- left rail ---------- */
+  .rail{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .rail-pad{padding:20px 20px 22px}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:11px;
+    letter-spacing:.22em;
+    color:var(--ink-3);
+    text-transform:uppercase;
+    margin:0 0 8px;
+  }
+  .wordmark{
+    font-family:"Bricolage Grotesque","Hanken Grotesk",sans-serif;
+    font-weight:800;
+    font-size:40px;
+    line-height:.96;
+    letter-spacing:-.02em;
+    margin:0 0 12px;
+  }
+  .lede{color:var(--ink-2);margin:0 0 18px;max-width:30ch}
+
+  .divider{height:1px;background:var(--line-2);margin:18px 0}
+
+  .label{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--ink-3);
+    display:block;
+    margin:0 0 9px;
+  }
+
+  /* segmented controls */
+  .seg{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:1fr;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:3px;
+    gap:3px;
+    background:var(--paper-2);
+  }
+  .seg button{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    font:inherit;color:var(--ink-2);
+    padding:8px 6px;border-radius:7px;
+    transition:background .15s,color .15s,box-shadow .15s;
+    font-weight:600;
+  }
+  .seg button .mono{font-size:13px}
+  .seg button[aria-pressed="true"]{
+    background:var(--panel);color:var(--ink);
+    box-shadow:0 1px 2px rgba(29,39,48,.12);
+  }
+  .seg button:hover:not([aria-pressed="true"]){color:var(--ink)}
+
+  .mode-mark{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+  .mode-walk .mode-mark{background:var(--w1)}
+  .mode-bike .mode-mark{background:var(--b1)}
+
+  .row-gap{margin-top:16px}
+
+  /* presets */
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    appearance:none;border:1px solid var(--line);background:var(--paper-2);
+    color:var(--ink-2);cursor:pointer;font:inherit;font-size:12.5px;font-weight:500;
+    padding:6px 11px;border-radius:999px;transition:border-color .15s,color .15s,background .15s;
+  }
+  .chip:hover{border-color:var(--ink-3);color:var(--ink);background:var(--panel)}
+
+  /* search */
+  .search{display:flex;gap:8px}
+  .search input{
+    flex:1;min-width:0;font:inherit;color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper-2);
+  }
+  .search input::placeholder{color:var(--ink-3)}
+  .search input:focus{outline:none;border-color:var(--focus);background:var(--panel)}
+  .btn{
+    appearance:none;border:1px solid var(--ink);background:var(--ink);color:#fff;
+    cursor:pointer;font:inherit;font-weight:600;border-radius:9px;padding:9px 14px;
+    transition:opacity .15s;white-space:nowrap;
+  }
+  .btn:hover{opacity:.88}
+  .btn.ghost{background:transparent;color:var(--ink);}
+  .btn.ghost:hover{background:var(--paper-2);opacity:1}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  /* ---------- legend / readout (the signature) ---------- */
+  .readout-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .readout-where{font-weight:600;font-size:14px}
+  .readout-coords{font-size:11px;color:var(--ink-3)}
+
+  .legend{display:flex;flex-direction:column;gap:2px}
+  .band{
+    position:relative;display:grid;
+    grid-template-columns:18px 56px 1fr;
+    align-items:center;gap:10px;
+    padding:9px 6px;border-radius:8px;
+    transition:background .12s;
+  }
+  .band:hover{background:var(--paper-2)}
+  .band.is-dim{opacity:.32}
+  .swatch{width:18px;height:18px;border-radius:5px;border:1px solid rgba(29,39,48,.18)}
+  .band-time{font-size:13px;font-weight:600}
+  .band-time .unit{color:var(--ink-3);font-weight:500;font-size:11px;margin-left:2px}
+  .band-meta{display:flex;flex-direction:column;gap:4px}
+  .band-bar{height:5px;border-radius:3px;background:var(--line-2);overflow:hidden}
+  .band-bar > i{display:block;height:100%;border-radius:3px}
+  .band-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-2)}
+  .band-stats b{font-weight:600;color:var(--ink)}
+
+  .hint{
+    color:var(--ink-3);font-size:12.5px;line-height:1.5;
+    border:1px dashed var(--line);border-radius:10px;padding:14px;
+  }
+
+  /* status line */
+  .status{
+    display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);
+    min-height:18px;margin-top:14px;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none}
+  .status.ok .dot{background:#2a8f7d}
+  .status.err{color:#a5403a}
+  .status.err .dot{background:#a5403a}
+  .status.busy .dot{background:var(--focus);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+  /* key gate */
+  .gate{margin-top:6px}
+  .gate .label{margin-bottom:7px}
+  .gate p{margin:0 0 10px;color:var(--ink-2);font-size:12.5px}
+  .gate a{color:var(--focus);font-weight:600;text-decoration:none}
+  .gate a:hover{text-decoration:underline}
+  .keyrow{display:flex;gap:8px;margin-top:8px}
+  .keyrow input{
+    flex:1;min-width:0;font-family:"IBM Plex Mono",monospace;font-size:12px;
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper-2);color:var(--ink);
+  }
+  .keyrow input:focus{outline:none;border-color:var(--focus);background:var(--panel)}
+  .key-ok{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:7px}
+  .key-ok button{appearance:none;background:none;border:0;color:var(--focus);cursor:pointer;font:inherit;font-size:12px;padding:0;text-decoration:underline}
+
+  /* about */
+  details.about{margin-top:4px}
+  details.about summary{
+    cursor:pointer;list-style:none;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);
+    display:flex;align-items:center;gap:8px;padding:4px 0;
+  }
+  details.about summary::-webkit-details-marker{display:none}
+  details.about summary::after{content:"+";margin-left:auto;font-size:14px;color:var(--ink-3)}
+  details.about[open] summary::after{content:"–"}
+  details.about .about-body{font-size:12px;color:var(--ink-2);line-height:1.55;padding-top:8px}
+  details.about .about-body p{margin:0 0 9px}
+  details.about .about-body code{font-family:"IBM Plex Mono",monospace;font-size:11px;background:var(--paper-2);padding:1px 5px;border-radius:4px}
+
+  /* ---------- map ---------- */
+  .map-wrap{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);min-height:0}
+  #map{position:absolute;inset:0;background:var(--paper-2)}
+  .leaflet-container{font-family:"Hanken Grotesk",sans-serif;background:#eef1f1}
+  .leaflet-control-attribution{
+    font-family:"IBM Plex Mono",monospace;font-size:9.5px;background:rgba(255,255,255,.82)!important;
+    color:var(--ink-3);
+  }
+  .leaflet-control-attribution a{color:var(--ink-2)}
+  .leaflet-bar a{color:var(--ink)}
+  .leaflet-control-scale-line{
+    font-family:"IBM Plex Mono",monospace;font-size:10px;border-color:var(--ink-2);color:var(--ink-2);
+    background:rgba(255,255,255,.75);
+  }
+
+  /* floating mode tag on map */
+  .map-tag{
+    position:absolute;top:14px;left:14px;z-index:500;
+    background:rgba(255,255,255,.9);backdrop-filter:blur(6px);
+    border:1px solid var(--line);border-radius:10px;
+    padding:8px 12px;font-size:12px;color:var(--ink-2);
+    display:flex;align-items:center;gap:9px;pointer-events:none;
+    box-shadow:0 4px 14px rgba(29,39,48,.10);
+  }
+  .map-tag .mode-mark{margin:0}
+  .map-tag b{color:var(--ink);font-weight:600}
+
+  /* origin marker */
+  .pin{position:relative;display:block;width:0;height:0}
+  .pin .dot{
+    position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;
+    background:var(--ink);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(29,39,48,.4);
+  }
+  .pin .ring{
+    position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;
+    border:2px solid var(--ink);opacity:0;
+  }
+  .pulsing .ring{animation:ripple 1.4s ease-out 2}
+  @keyframes ripple{
+    0%{transform:scale(1);opacity:.55}
+    100%{transform:scale(6.5);opacity:0}
+  }
+
+  /* mobile sheet toggle (hidden on desktop) */
+  .sheet-toggle{display:none}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:880px){
+    .app{
+      grid-template-columns:1fr;
+      grid-template-rows:1fr;
+      padding:0;gap:0;
+    }
+    .map-wrap{border-radius:0;border:0}
+    .rail{
+      position:absolute;z-index:1200;left:0;right:0;bottom:0;
+      max-height:64vh;border-radius:18px 18px 0 0;
+      border:1px solid var(--line);border-bottom:0;
+      transform:translateY(calc(100% - 64px));
+      transition:transform .28s cubic-bezier(.22,.61,.36,1);
+    }
+    .rail.open{transform:translateY(0)}
+    .sheet-toggle{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      width:100%;height:64px;background:transparent;border:0;cursor:pointer;
+      font:inherit;font-weight:600;color:var(--ink);position:sticky;top:0;
+    }
+    .sheet-toggle .grip{width:38px;height:4px;border-radius:3px;background:var(--line);position:absolute;top:9px;left:50%;transform:translateX(-50%)}
+    .rail-pad{padding:4px 18px 26px}
+    .wordmark{font-size:30px}
+    .map-tag{top:12px;left:12px}
+  }
+
+  /* a11y */
+  :focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ LEFT RAIL ============ -->
+  <aside class="rail" id="rail">
+    <button class="sheet-toggle" id="sheetToggle" aria-label="Expand controls">
+      <span class="grip"></span><span>Controls &amp; legend</span>
+    </button>
+
+    <div class="rail-pad">
+      <p class="eyebrow">Minneapolis — Saint&nbsp;Paul</p>
+      <h1 class="wordmark">Within&nbsp;reach</h1>
+      <p class="lede">Drop a point to see how far you can walk or bike, minute by minute — routed on real streets and trails.</p>
+
+      <!-- mode -->
+      <label class="label" for="modeSeg">Travel mode</label>
+      <div class="seg" id="modeSeg" role="group" aria-label="Travel mode">
+        <button data-mode="bike" class="mode-bike" aria-pressed="true"><span class="mode-mark"></span>Bike</button>
+        <button data-mode="walk" class="mode-walk" aria-pressed="false"><span class="mode-mark"></span>Walk</button>
+      </div>
+
+      <!-- horizon -->
+      <div class="row-gap">
+        <label class="label" for="horizonSeg">Time horizon · 5-minute bands</label>
+        <div class="seg" id="horizonSeg" role="group" aria-label="Time horizon">
+          <button data-max="15" aria-pressed="false"><span class="mono">15</span></button>
+          <button data-max="20" aria-pressed="false"><span class="mono">20</span></button>
+          <button data-max="25" aria-pressed="false"><span class="mono">25</span></button>
+          <button data-max="30" aria-pressed="true"><span class="mono">30</span></button>
+        </div>
+      </div>
+
+      <!-- presets -->
+      <div class="row-gap">
+        <label class="label">Jump to a starting point</label>
+        <div class="chips" id="presets"></div>
+      </div>
+
+      <!-- search -->
+      <div class="row-gap">
+        <label class="label" for="searchInput">Or search an address</label>
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="e.g. Surly Brewing, Minneapolis" autocomplete="off" />
+          <button class="btn" id="searchBtn">Find</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- readout / legend -->
+      <div id="readout">
+        <div class="hint" id="emptyHint">
+          No point set yet. Click anywhere on the map, drag the pin to fine-tune, or pick a starting point above.
+        </div>
+      </div>
+
+      <!-- status -->
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Ready</span></div>
+
+      <!-- key gate -->
+      <div class="gate" id="gate">
+        <div class="divider"></div>
+        <span class="label">Routing key</span>
+        <p>This map computes real reach using <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener">OpenRouteService</a> (OpenStreetMap data). Paste a free key to begin — the free tier allows ~2,000 lookups a day.</p>
+        <div class="keyrow">
+          <input id="keyInput" type="password" placeholder="Paste your API key" autocomplete="off" spellcheck="false" />
+          <button class="btn" id="keySave">Save</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- about / method -->
+      <details class="about">
+        <summary>About the data</summary>
+        <div class="about-body">
+          <p>Reach is computed by <b>OpenRouteService</b>, which routes over the live <b>OpenStreetMap</b> network and returns the area you can actually reach within each time band — not a circle drawn from average speed.</p>
+          <p>Walking is modelled at roughly <span class="mono">5&nbsp;km/h</span>. Cycling speed depends on the way: about <span class="mono">18&nbsp;km/h</span> on cycleways and quiet residential streets, slower on rough paths, faster downhill.</p>
+          <p>Watch what the Mississippi does to the contours: because crossings funnel onto a handful of bridges, the bands pinch hard at the river and bulge along grade-separated trails like the <b>Midtown Greenway</b>, the city's car-free "bike highway."</p>
+          <p>Each band lists the cumulative reachable area, and the resident population inside it where OpenRouteService can estimate it.</p>
+        </div>
+      </details>
+    </div>
+  </aside>
+
+  <!-- ============ MAP ============ -->
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-tag" id="mapTag"><span class="mode-mark" id="tagMark"></span><span id="tagText">Click the map to begin</span></div>
+  </div>
+
+</div>
+
+<script>
+function startApp(){
+  "use strict";
+
+  /* ---------------- state ---------------- */
+  const RAMP = {
+    bike: ["#3a2c86","#5a4fb3","#7e72cf","#a69ddd","#cbc4ec","#ece8f8"],
+    walk: ["#0c6e60","#2a8f7d","#58ad96","#8ac7b1","#bcdfcd","#e7f2ea"]
+  };
+  const PROFILE = { bike:"cycling-regular", walk:"foot-walking" };
+  const state = { mode:"bike", maxMin:30, origin:null, key:"",
+busy:false };
+
+
+// hard-code my own key
+  state.key = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjRmMmU1NWM4OTFmMzQ1N2E5Yzk2NjBlY2FjOGQwZWQwIiwiaCI6Im11cm11cjY0In0=";
+
+  const cache = new Map();
+  let abortCtl = null;
+
+  const PRESETS = [
+    {name:"Downtown Mpls",       lat:44.9772, lng:-93.2716},
+    {name:"Stone Arch Bridge",   lat:44.9809, lng:-93.2575},
+    {name:"Midtown Greenway",    lat:44.9483, lng:-93.2300},
+    {name:"Bde Maka Ska",        lat:44.9436, lng:-93.3105},
+    {name:"Downtown St. Paul",   lat:44.9446, lng:-93.0972},
+    {name:"Macalester College",  lat:44.9379, lng:-93.1686}
+  ];
+
+  /* ---------------- map ---------------- */
+  const map = L.map("map", { zoomControl:true, attributionControl:true })
+    .setView([44.962, -93.165], 12);
+
+  map.createPane("iso");    map.getPane("iso").style.zIndex = 380;
+  map.createPane("lbl");    map.getPane("lbl").style.zIndex = 450;
+  map.getPane("lbl").style.pointerEvents = "none";
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
+    attribution:'&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a> · routing <a href="https://openrouteservice.org">ORS</a>',
+    subdomains:"abcd", maxZoom:19
+  }).addTo(map);
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png", {
+    pane:"lbl", subdomains:"abcd", maxZoom:19
+  }).addTo(map);
+
+  L.control.scale({ imperial:true, metric:true, position:"bottomleft" }).addTo(map);
+
+  const isoLayer = L.layerGroup([], { pane:"iso" }).addTo(map);
+  let marker = null;
+
+  /* ---------------- elements ---------------- */
+  const $ = (id)=>document.getElementById(id);
+  const statusEl = $("status"), statusText = $("statusText");
+  const readout = $("readout"), emptyHint = $("emptyHint");
+  const gate = $("gate"), tagMark = $("tagMark"), tagText = $("tagText");
+
+  function setStatus(text, kind){
+    statusText.textContent = text;
+    statusEl.className = "status" + (kind ? " "+kind : "");
+  }
+  function updateTag(){
+    tagMark.style.background = state.mode==="bike" ? "var(--b1)" : "var(--w1)";
+    tagText.innerHTML = state.origin
+      ? `<b>${state.mode==="bike"?"Cycling":"Walking"}</b> reach · up to <b>${state.maxMin} min</b>`
+      : "Click the map to begin";
+  }
+
+  /* ---------------- key handling (session only) ---------------- */
+  function renderGate(){
+    if(state.key){
+      gate.innerHTML = `<div class="divider"></div>
+        <span class="label">Routing key</span>
+        <div class="key-ok"><span class="dot" style="background:#2a8f7d"></span>
+        Key active for this session. <button id="keyChange">Change</button></div>`;
+      $("keyChange").addEventListener("click", ()=>{ state.key=""; renderGate(); setStatus("Add a routing key to compute reach"); });
+    }else{
+      gate.innerHTML = `<div class="divider"></div>
+        <span class="label">Routing key</span>
+        <p>This map computes real reach using <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener">OpenRouteService</a> (OpenStreetMap data). Paste a free key to begin — the free tier allows ~2,000 lookups a day.</p>
+        <div class="keyrow">
+          <input id="keyInput" type="password" placeholder="Paste your API key" autocomplete="off" spellcheck="false" />
+          <button class="btn" id="keySave">Save</button>
+        </div>`;
+      $("keySave").addEventListener("click", saveKey);
+      $("keyInput").addEventListener("keydown", e=>{ if(e.key==="Enter") saveKey(); });
+    }
+  }
+  function saveKey(){
+    const v = $("keyInput").value.trim();
+    if(!v) return;
+    state.key = v;
+    renderGate();
+    setStatus("Key saved — set a point to route", "ok");
+    if(state.origin) compute();
+  }
+
+  /* ---------------- controls ---------------- */
+  function wireSeg(id, attr, apply){
+    const grp = $(id);
+    grp.addEventListener("click", e=>{
+      const btn = e.target.closest("button"); if(!btn) return;
+      [...grp.children].forEach(b=>b.setAttribute("aria-pressed", b===btn ? "true":"false"));
+      apply(btn.dataset[attr]);
+    });
+  }
+  wireSeg("modeSeg","mode", v=>{ state.mode=v; updateTag(); if(state.origin) compute(); });
+  wireSeg("horizonSeg","max", v=>{ state.maxMin=+v; updateTag(); if(state.origin) compute(); });
+
+  const presetsEl = $("presets");
+  PRESETS.forEach(p=>{
+    const b = document.createElement("button");
+    b.className="chip"; b.textContent=p.name;
+    b.addEventListener("click", ()=>{ setOrigin(L.latLng(p.lat,p.lng), true); map.setView([p.lat,p.lng], 13, {animate:true}); });
+    presetsEl.appendChild(b);
+  });
+
+  $("searchBtn").addEventListener("click", runSearch);
+  $("searchInput").addEventListener("keydown", e=>{ if(e.key==="Enter") runSearch(); });
+
+  async function runSearch(){
+    const q = $("searchInput").value.trim();
+    if(!q) return;
+    setStatus("Searching…","busy");
+    try{
+      const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&bounded=1"
+        + "&viewbox=-93.62,45.10,-92.90,44.78&q=" + encodeURIComponent(q);
+      const r = await fetch(url, { headers:{ "Accept":"application/json" } });
+      const j = await r.json();
+      if(!j.length){ setStatus("No match in the Twin Cities for that search","err"); return; }
+      const ll = L.latLng(+j[0].lat, +j[0].lon);
+      setOrigin(ll, true);
+      map.setView(ll, 13, {animate:true});
+    }catch(err){
+      setStatus("Search is unavailable right now — try clicking the map","err");
+    }
+  }
+
+  /* ---------------- origin marker ---------------- */
+  function makeIcon(pulse){
+    return L.divIcon({
+      className:"", iconSize:[0,0],
+      html:`<span class="pin ${pulse?"pulsing":""}"><span class="ring"></span><span class="dot"></span></span>`
+    });
+  }
+  map.on("click", e=> setOrigin(e.latlng, true));
+
+  function setOrigin(latlng, pulse){
+    state.origin = latlng;
+    if(!marker){
+      marker = L.marker(latlng, { icon:makeIcon(pulse), draggable:true, keyboard:false }).addTo(map);
+      marker.on("dragend", ()=>{ state.origin = marker.getLatLng(); compute(); });
+    }else{
+      marker.setIcon(makeIcon(pulse));
+      marker.setLatLng(latlng);
+    }
+    compute();
+  }
+
+  /* ---------------- compute isochrones ---------------- */
+  function ranges(){
+    const out=[]; for(let m=5; m<=state.maxMin; m+=5) out.push(m); return out;
+  }
+  function cacheKey(){
+    const o = state.origin;
+    return [state.mode, state.maxMin, o.lat.toFixed(4), o.lng.toFixed(4)].join("|");
+  }
+
+  async function compute(){
+    if(!state.origin) return;
+    emptyHint && (emptyHint.style.display="none");
+    updateTag();
+
+    if(!state.key){
+      setStatus("Add a free routing key below to compute reach","err");
+      renderEmptyLegend();
+      return;
+    }
+
+    const ck = cacheKey();
+    if(cache.has(ck)){ draw(cache.get(ck)); setStatus("Ready (cached)","ok"); return; }
+
+    if(abortCtl) abortCtl.abort();
+    abortCtl = new AbortController();
+    state.busy = true;
+    setStatus("Routing…","busy");
+
+    const mins = ranges();
+    const body = {
+      locations: [[state.origin.lng, state.origin.lat]],
+      range: mins.map(m=>m*60),
+      range_type: "time",
+      attributes: ["area","total_pop"],
+      area_units: "km",
+      location_type: "start"
+    };
+
+    try{
+      const res = await fetch("https://api.openrouteservice.org/v2/isochrones/"+PROFILE[state.mode], {
+        method:"POST", signal:abortCtl.signal,
+        headers:{ "Authorization":state.key, "Content-Type":"application/json", "Accept":"application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if(res.status===401 || res.status===403){ setStatus("That key was rejected — check it and try again","err"); return; }
+      if(res.status===429){ setStatus("Daily routing limit reached — try later or another key","err"); return; }
+      if(!res.ok){ setStatus("Routing service error ("+res.status+")","err"); return; }
+
+      const data = await res.json();
+      if(!data.features || !data.features.length){ setStatus("No reachable area returned for that point","err"); return; }
+      cache.set(ck, data);
+      draw(data);
+      setStatus("Reach computed on real streets & trails","ok");
+    }catch(err){
+      if(err.name==="AbortError") return;
+      setStatus("Couldn't reach the routing service — check connection and retry","err");
+    }finally{
+      state.busy=false;
+    }
+  }
+
+  /* ---------------- draw ---------------- */
+  function colorFor(min){ return RAMP[state.mode][(min/5)-1]; }
+
+  function draw(geojson){
+    isoLayer.clearLayers();
+    // ORS returns one feature per range; sort large→small so inner bands sit on top
+    const feats = geojson.features.slice().sort((a,b)=> b.properties.value - a.properties.value);
+
+    feats.forEach(f=>{
+      const min = Math.round(f.properties.value/60);
+      const col = colorFor(min);
+      L.geoJSON(f, {
+        pane:"iso",
+        style:{ color:col, weight:1.5, opacity:.85, fillColor:col, fillOpacity:.16, lineJoin:"round" }
+      }).addTo(isoLayer);
+    });
+
+    renderLegend(feats);
+  }
+
+  function fmtArea(km2){
+    if(km2 == null) return "—";
+    return km2 >= 10 ? km2.toFixed(0) : km2.toFixed(1);
+  }
+  function fmtPop(p){
+    if(p == null || p === 0) return null;
+    if(p >= 1000) return (p/1000).toFixed(p>=10000?0:1)+"k";
+    return Math.round(p).toString();
+  }
+
+  function renderLegend(feats){
+    // ascending by time for reading top→bottom
+    const asc = feats.slice().sort((a,b)=> a.properties.value - b.properties.value);
+    const maxArea = Math.max(...asc.map(f=> f.properties.area || 0)) || 1;
+
+    let rows = "";
+    asc.forEach(f=>{
+      const min = Math.round(f.properties.value/60);
+      const col = colorFor(min);
+      const areaKm = f.properties.area;            // ORS returns km² when area_units=km
+      const pop = fmtPop(f.properties.total_pop);
+      const w = Math.max(6, Math.round((areaKm||0)/maxArea*100));
+      rows += `<div class="band" data-min="${min}">
+        <span class="swatch" style="background:${col}"></span>
+        <span class="band-time mono">${min}<span class="unit">min</span></span>
+        <span class="band-meta">
+          <span class="band-bar"><i style="width:${w}%;background:${col}"></i></span>
+          <span class="band-stats">
+            <span><b class="mono">${fmtArea(areaKm)}</b> km²</span>
+            ${pop ? `<span><b class="mono">${pop}</b> people</span>` : `<span style="color:var(--ink-3)">reach</span>`}
+          </span>
+        </span>
+      </div>`;
+    });
+
+    const o = state.origin;
+    readout.innerHTML = `
+      <div class="readout-head">
+        <span class="readout-where">${state.mode==="bike"?"Cycling":"Walking"} reach</span>
+        <span class="readout-coords mono">${o.lat.toFixed(4)}, ${o.lng.toFixed(4)}</span>
+      </div>
+      <div class="legend" id="legend">${rows}</div>`;
+
+    // hover a legend row -> emphasize by dimming the others
+    const legend = $("legend");
+    legend.querySelectorAll(".band").forEach(b=>{
+      b.addEventListener("mouseenter", ()=> legend.querySelectorAll(".band").forEach(x=>{ if(x!==b) x.classList.add("is-dim"); }));
+      b.addEventListener("mouseleave", ()=> legend.querySelectorAll(".band").forEach(x=> x.classList.remove("is-dim")));
+    });
+  }
+
+  function renderEmptyLegend(){
+    const o = state.origin;
+    readout.innerHTML = `<div class="hint">Point set at <span class="mono">${o.lat.toFixed(4)}, ${o.lng.toFixed(4)}</span>.
+      Add a routing key below to draw the reach contours.</div>`;
+  }
+
+  /* ---------------- mobile sheet ---------------- */
+  $("sheetToggle").addEventListener("click", ()=>{
+    const rail = $("rail");
+    rail.classList.toggle("open");
+    $("sheetToggle").setAttribute("aria-label", rail.classList.contains("open") ? "Collapse controls" : "Expand controls");
+    setTimeout(()=> map.invalidateSize(), 300);
+  });
+
+  /* ---------------- init ---------------- */
+  updateTag();
+  setStatus("Add a routing key, then click the map");
+  renderGate();
+}
+
+/* ---------------- bootstrap: load Leaflet, then start ---------------- */
+(function bootstrap(){
+  var CDNS = [
+    "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+  ];
+  function fail(){
+    var t = document.getElementById("statusText"),
+        s = document.getElementById("status");
+    if(t){ t.textContent = "Couldn't load the map library — check your connection and reload"; }
+    if(s){ s.className = "status err"; }
+  }
+  function load(i){
+    if(window.L){ startApp(); return; }
+    if(i >= CDNS.length){ fail(); return; }
+    var sc = document.createElement("script");
+    sc.src = CDNS[i];
+    sc.crossOrigin = "anonymous";
+    sc.onload  = function(){ window.L ? startApp() : load(i+1); };
+    sc.onerror = function(){ load(i+1); };
+    document.head.appendChild(sc);
+  }
+  if(window.L) startApp(); else load(0);
+})();
+</script>
+</body>
+</html>
