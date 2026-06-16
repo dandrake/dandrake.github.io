@@ -3,11 +3,18 @@ layout: default
 title: dandrake.github.io
 ---
 
-I teach computer science and data science courses at [Macalester College](https://www.macalester.edu/). I have a PhD in math and spent many years as a math professor and hope to get back to teaching those courses again...
+I teach computer science and data science courses at [Macalester College](https://www.macalester.edu/). (Starting fall 2026, I'll be doing the same at [Saint Olaf College](https://stolaf.edu).) I have a PhD in math and spent many years as a math professor and hope to get back to teaching those courses again...
 
 [Here's my CV](dan-drake-cv.pdf)
 
 ## teaching
+
+
+### CSCI 121: Principles of Computer Science, fall 2026
+
+### CSCI 379: Foundations of Artificial Intelligence, fall 2026
+
+## Older stuff
 
 ### COMP/STAT 112, Introduction to Data Science, spring 2026
 
@@ -20,8 +27,6 @@ Almost everything for this course is on Moodle, but the [syllabus is here](cours
 ## workflow wizard walkthrough for Visual Studio + Java + Git installation
 
 [See the live page](workflow-wizard-walkthrough/) for [this repo](https://github.com/dandrake/workflow-wizard-walkthrough).
-
-## Older stuff
 
 ### COMP 127 syllabus, fall 2025
 
