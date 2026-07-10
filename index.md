@@ -5,7 +5,7 @@ title: dandrake.github.io
 
 I teach computer science and data science courses at [Macalester College](https://www.macalester.edu/). (Starting fall 2026, I'll be doing the same at [Saint Olaf College](https://stolaf.edu).) I have a PhD in math and spent many years as a math professor and hope to get back to teaching those courses again...
 
-[Here's my CV](dan-drake-cv.pdf)
+cv[Here's my CV](dan-drake-cv.pdf)
 
 ## teaching
 
@@ -37,6 +37,10 @@ Almost everything for this course is on Moodle, but the [syllabus is here](cours
 ### [AI for the Confused](outreach/ai_for_the_confused)
 
 A placeholder page which I'm posting in part to shame myself into actually writing that and describing the public outreach I'm doing...
+
+## writing
+
+### [Grades are a 1-pixel approximation of a complex picture](writing/grades_1_pixel/grades_are_a_1-pixel_approximation_to_a_complex_picture.md)
 
 ## code projects
 
