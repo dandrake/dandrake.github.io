@@ -13,37 +13,48 @@
 
 <style>
   :root{
-    /* --- palette: cool paper + slate ink; data carries all the color --- */
-    --paper:#e9edee;          /* cool off-white, not cream */
-    --paper-2:#f4f6f6;
-    --panel:#ffffff;
-    --ink:#1d2730;            /* cold slate, not black */
-    --ink-2:#48565f;
-    --ink-3:#7d8a91;
-    --line:#cdd6d8;
-    --line-2:#dde4e5;
-    --focus:#1d6b8c;
+    /* ============================================================
+       Palette — "River gorge / field survey"
+       The Twin Cities are the only place the Mississippi runs
+       through a true urban gorge. The chrome is cool limestone-and-
+       water; the map's data ramps carry the only saturated color.
+       One warm note — sandstone bluff — is spent on the origin pin.
+       ============================================================ */
+    --field:#dbe1dd;          /* cool sage-gray map field, not cream */
+    --field-2:#eaeeeb;
+    --panel:#fbfcfb;
+    --ink:#1f2b28;            /* deep pine-slate, green-cast, not black */
+    --ink-2:#495751;
+    --ink-3:#7d8b85;
+    --line:#c7d0cb;
+    --line-2:#d9e0db;
+
+    --river:#2c6f7e;         /* the Mississippi — the spine + focus color */
+    --river-soft:#7fb0b8;
+    --bluff:#c07a4b;         /* sandstone bluff — the single warm accent */
+    --focus:var(--river);
 
     /* walking ramp: pine -> pale (5,10,15,20,25,30 min) */
     --w1:#0c6e60; --w2:#2a8f7d; --w3:#58ad96; --w4:#8ac7b1; --w5:#bcdfcd; --w6:#e7f2ea;
     /* cycling ramp: indigo -> pale */
     --b1:#3a2c86; --b2:#5a4fb3; --b3:#7e72cf; --b4:#a69ddd; --b5:#cbc4ec; --b6:#ece8f8;
 
-    --rail-w:340px;
+    --rail-w:352px;
     --radius:14px;
-    --shadow:0 1px 2px rgba(29,39,48,.06), 0 12px 30px rgba(29,39,48,.10);
+    --shadow:0 1px 2px rgba(31,43,40,.06), 0 14px 34px rgba(31,43,40,.12);
+    --seam-w:26px;           /* the river gutter down the rail */
   }
 
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0;
-    background:var(--paper);
+    background:var(--field);
     color:var(--ink);
     font-family:"Hanken Grotesk",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;
-    font-size:14px;
-    line-height:1.45;
+    font-size:13px;
+    line-height:1.4;
   }
   .mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
 
@@ -53,8 +64,8 @@
     grid-template-columns:var(--rail-w) 1fr;
     grid-template-rows:100%;
     height:100%;
-    gap:14px;
-    padding:14px;
+    gap:12px;
+    padding:10px;
   }
 
   /* ---------- left rail ---------- */
@@ -68,27 +79,74 @@
     flex-direction:column;
     min-height:0;
   }
-  .rail-pad{padding:20px 20px 22px}
+  /* The river seam: content hangs to the right of a meandering line
+     that runs the full height of the rail — the Mississippi as spine. */
+  .rail-pad{
+    position:relative;
+    padding:12px 22px 14px calc(var(--seam-w) + 22px);
+  }
+  .rail-pad::before{
+    content:"";
+    position:absolute;
+    top:0; bottom:0; left:14px; width:var(--seam-w);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='900' viewBox='0 0 26 900' preserveAspectRatio='none'%3E%3Cpath d='M13 0 C4 90 22 180 13 270 S4 450 13 540 S22 720 13 810 S8 880 13 900' fill='none' stroke='%232c6f7e' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    opacity:.28;
+    pointer-events:none;
+  }
 
+  /* ---------- hero: the reach-ring wordmark ---------- */
+  .hero{position:relative;margin-bottom:12px}
+  .reach-rings{
+    position:absolute;
+    top:0px; left:-6px;
+    width:104px; height:104px;
+    z-index:0; pointer-events:none;
+    overflow:visible;
+  }
+  .reach-rings circle{
+    fill:none;
+    stroke:var(--river);
+    stroke-width:1.4;
+    opacity:.26;
+    stroke-dasharray:var(--circ);
+    stroke-dashoffset:var(--circ);
+    animation:draw 1.15s cubic-bezier(.3,.9,.3,1) forwards;
+  }
+  .reach-rings circle:nth-child(1){--circ:151; animation-delay:.05s}
+  .reach-rings circle:nth-child(2){--circ:264; animation-delay:.16s}
+  .reach-rings circle:nth-child(3){--circ:377; animation-delay:.27s}
+  .reach-rings circle:nth-child(4){--circ:490; animation-delay:.38s}
+  .reach-rings circle:nth-child(5){--circ:603; animation-delay:.49s}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  .hero > *{position:relative;z-index:1}
   .eyebrow{
     font-family:"IBM Plex Mono",monospace;
     font-size:11px;
     letter-spacing:.22em;
-    color:var(--ink-3);
+    color:var(--river);
     text-transform:uppercase;
-    margin:0 0 8px;
+    margin:0 0 10px;
   }
   .wordmark{
     font-family:"Bricolage Grotesque","Hanken Grotesk",sans-serif;
     font-weight:800;
-    font-size:40px;
-    line-height:.96;
-    letter-spacing:-.02em;
-    margin:0 0 12px;
+    font-size:29px;
+    line-height:.94;
+    letter-spacing:-.025em;
+    margin:0 0 8px;
   }
-  .lede{color:var(--ink-2);margin:0 0 18px;max-width:30ch}
+  .lede{color:var(--ink-2);margin:0;max-width:31ch}
 
-  .divider{height:1px;background:var(--line-2);margin:18px 0}
+  /* Contour hairline — the divider reframed as a map contour interval */
+  .divider{height:1px;background:var(--line-2);margin:9px 0}
+  .divider.contour{
+    height:0;border:0;border-top:1px solid var(--line);
+    background:none;
+    -webkit-mask-image:none;
+  }
 
   .label{
     font-family:"IBM Plex Mono",monospace;
@@ -97,7 +155,7 @@
     text-transform:uppercase;
     color:var(--ink-3);
     display:block;
-    margin:0 0 9px;
+    margin:0 0 6px;
   }
 
   /* segmented controls */
@@ -109,7 +167,7 @@
     border-radius:10px;
     padding:3px;
     gap:3px;
-    background:var(--paper-2);
+    background:var(--field-2);
   }
   .seg button{
     appearance:none;border:0;background:transparent;cursor:pointer;
@@ -121,7 +179,7 @@
   .seg button .mono{font-size:13px}
   .seg button[aria-pressed="true"]{
     background:var(--panel);color:var(--ink);
-    box-shadow:0 1px 2px rgba(29,39,48,.12);
+    box-shadow:0 1px 2px rgba(31,43,40,.14);
   }
   .seg button:hover:not([aria-pressed="true"]){color:var(--ink)}
 
@@ -129,22 +187,22 @@
   .mode-walk .mode-mark{background:var(--w1)}
   .mode-bike .mode-mark{background:var(--b1)}
 
-  .row-gap{margin-top:16px}
+  .row-gap{margin-top:11px}
 
   /* presets */
   .chips{display:flex;flex-wrap:wrap;gap:7px}
   .chip{
-    appearance:none;border:1px solid var(--line);background:var(--paper-2);
+    appearance:none;border:1px solid var(--line);background:var(--field-2);
     color:var(--ink-2);cursor:pointer;font:inherit;font-size:12.5px;font-weight:500;
     padding:6px 11px;border-radius:999px;transition:border-color .15s,color .15s,background .15s;
   }
-  .chip:hover{border-color:var(--ink-3);color:var(--ink);background:var(--panel)}
+  .chip:hover{border-color:var(--river-soft);color:var(--ink);background:var(--panel)}
 
   /* search */
   .search{display:flex;gap:8px}
   .search input{
     flex:1;min-width:0;font:inherit;color:var(--ink);
-    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper-2);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--field-2);
   }
   .search input::placeholder{color:var(--ink-3)}
   .search input:focus{outline:none;border-color:var(--focus);background:var(--panel)}
@@ -155,11 +213,11 @@
   }
   .btn:hover{opacity:.88}
   .btn.ghost{background:transparent;color:var(--ink);}
-  .btn.ghost:hover{background:var(--paper-2);opacity:1}
+  .btn.ghost:hover{background:var(--field-2);opacity:1}
   .btn:disabled{opacity:.4;cursor:default}
 
-  /* ---------- legend / readout (the signature) ---------- */
-  .readout-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+  /* ---------- legend / soundings (the signature) ---------- */
+  .readout-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
   .readout-where{font-weight:600;font-size:14px}
   .readout-coords{font-size:11px;color:var(--ink-3)}
 
@@ -168,12 +226,12 @@
     position:relative;display:grid;
     grid-template-columns:18px 56px 1fr;
     align-items:center;gap:10px;
-    padding:9px 6px;border-radius:8px;
+    padding:5px 6px;border-radius:8px;
     transition:background .12s;
   }
-  .band:hover{background:var(--paper-2)}
+  .band:hover{background:var(--field-2)}
   .band.is-dim{opacity:.32}
-  .swatch{width:18px;height:18px;border-radius:5px;border:1px solid rgba(29,39,48,.18)}
+  .swatch{width:18px;height:18px;border-radius:5px;border:1px solid rgba(31,43,40,.18)}
   .band-time{font-size:13px;font-weight:600}
   .band-time .unit{color:var(--ink-3);font-weight:500;font-size:11px;margin-left:2px}
   .band-meta{display:flex;flex-direction:column;gap:4px}
@@ -183,17 +241,18 @@
   .band-stats b{font-weight:600;color:var(--ink)}
 
   .hint{
-    color:var(--ink-3);font-size:12.5px;line-height:1.5;
-    border:1px dashed var(--line);border-radius:10px;padding:14px;
+    color:var(--ink-2);font-size:12.5px;line-height:1.55;
+    border:1px solid var(--line);border-left:3px solid var(--river);
+    border-radius:0 10px 10px 0;padding:13px 15px;background:var(--field-2);
   }
 
   /* status line */
   .status{
     display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);
-    min-height:18px;margin-top:14px;
+    min-height:18px;margin-top:10px;
   }
   .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3);flex:none}
-  .status.ok .dot{background:#2a8f7d}
+  .status.ok .dot{background:var(--w2)}
   .status.err{color:#a5403a}
   .status.err .dot{background:#a5403a}
   .status.busy .dot{background:var(--focus);animation:pulse 1s infinite}
@@ -203,16 +262,16 @@
   .gate{margin-top:6px}
   .gate .label{margin-bottom:7px}
   .gate p{margin:0 0 10px;color:var(--ink-2);font-size:12.5px}
-  .gate a{color:var(--focus);font-weight:600;text-decoration:none}
+  .gate a{color:var(--river);font-weight:600;text-decoration:none}
   .gate a:hover{text-decoration:underline}
   .keyrow{display:flex;gap:8px;margin-top:8px}
   .keyrow input{
     flex:1;min-width:0;font-family:"IBM Plex Mono",monospace;font-size:12px;
-    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--paper-2);color:var(--ink);
+    border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--field-2);color:var(--ink);
   }
   .keyrow input:focus{outline:none;border-color:var(--focus);background:var(--panel)}
   .key-ok{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:7px}
-  .key-ok button{appearance:none;background:none;border:0;color:var(--focus);cursor:pointer;font:inherit;font-size:12px;padding:0;text-decoration:underline}
+  .key-ok button{appearance:none;background:none;border:0;color:var(--river);cursor:pointer;font:inherit;font-size:12px;padding:0;text-decoration:underline}
 
   /* about */
   details.about{margin-top:4px}
@@ -226,44 +285,47 @@
   details.about[open] summary::after{content:"–"}
   details.about .about-body{font-size:12px;color:var(--ink-2);line-height:1.55;padding-top:8px}
   details.about .about-body p{margin:0 0 9px}
-  details.about .about-body code{font-family:"IBM Plex Mono",monospace;font-size:11px;background:var(--paper-2);padding:1px 5px;border-radius:4px}
+  details.about .about-body code{font-family:"IBM Plex Mono",monospace;font-size:11px;background:var(--field-2);padding:1px 5px;border-radius:4px}
 
   /* ---------- map ---------- */
   .map-wrap{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);min-height:0}
-  #map{position:absolute;inset:0;background:var(--paper-2)}
-  .leaflet-container{font-family:"Hanken Grotesk",sans-serif;background:#eef1f1}
+  #map{position:absolute;inset:0;background:var(--field-2)}
+  .leaflet-container{font-family:"Hanken Grotesk",sans-serif;background:#eae6dd}
+  /* Colour lives on the map. Boost the basemap's water & parks without
+     touching the isochrone overlay or the pin (those sit in their own panes). */
+  .leaflet-tile-pane{filter:saturate(1.28) contrast(1.03)}
   .leaflet-control-attribution{
-    font-family:"IBM Plex Mono",monospace;font-size:9.5px;background:rgba(255,255,255,.82)!important;
+    font-family:"IBM Plex Mono",monospace;font-size:9.5px;background:rgba(251,252,251,.84)!important;
     color:var(--ink-3);
   }
   .leaflet-control-attribution a{color:var(--ink-2)}
   .leaflet-bar a{color:var(--ink)}
   .leaflet-control-scale-line{
     font-family:"IBM Plex Mono",monospace;font-size:10px;border-color:var(--ink-2);color:var(--ink-2);
-    background:rgba(255,255,255,.75);
+    background:rgba(251,252,251,.78);
   }
 
   /* floating mode tag on map */
   .map-tag{
     position:absolute;top:14px;left:14px;z-index:500;
-    background:rgba(255,255,255,.9);backdrop-filter:blur(6px);
+    background:rgba(251,252,251,.9);backdrop-filter:blur(6px);
     border:1px solid var(--line);border-radius:10px;
     padding:8px 12px;font-size:12px;color:var(--ink-2);
     display:flex;align-items:center;gap:9px;pointer-events:none;
-    box-shadow:0 4px 14px rgba(29,39,48,.10);
+    box-shadow:0 4px 14px rgba(31,43,40,.12);
   }
   .map-tag .mode-mark{margin:0}
   .map-tag b{color:var(--ink);font-weight:600}
 
-  /* origin marker */
+  /* origin marker — a sandstone survey pin driven into the bluff */
   .pin{position:relative;display:block;width:0;height:0}
   .pin .dot{
     position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;
-    background:var(--ink);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(29,39,48,.4);
+    background:var(--bluff);border:2.5px solid #fff;box-shadow:0 2px 6px rgba(31,43,40,.4);
   }
   .pin .ring{
     position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;
-    border:2px solid var(--ink);opacity:0;
+    border:2px solid var(--bluff);opacity:0;
   }
   .pulsing .ring{animation:ripple 1.4s ease-out 2}
   @keyframes ripple{
@@ -296,8 +358,9 @@
       font:inherit;font-weight:600;color:var(--ink);position:sticky;top:0;
     }
     .sheet-toggle .grip{width:38px;height:4px;border-radius:3px;background:var(--line);position:absolute;top:9px;left:50%;transform:translateX(-50%)}
-    .rail-pad{padding:4px 18px 26px}
-    .wordmark{font-size:30px}
+    .rail-pad{padding:4px 18px 26px calc(var(--seam-w) + 16px)}
+    .wordmark{font-size:32px}
+    .reach-rings{width:120px;height:120px}
     .map-tag{top:12px;left:12px}
   }
 
@@ -305,6 +368,7 @@
   :focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:4px}
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
+    .reach-rings circle{stroke-dashoffset:0}
   }
 </style>
 </head>
@@ -318,9 +382,18 @@
     </button>
 
     <div class="rail-pad">
-      <p class="eyebrow">Minneapolis — Saint&nbsp;Paul</p>
-      <h1 class="wordmark">Within&nbsp;reach</h1>
-      <p class="lede">Drop a point to see how far you can walk or bike, minute by minute — routed on real streets and trails.</p>
+      <div class="hero">
+        <svg class="reach-rings" viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="24" cy="24" r="24"/>
+          <circle cx="24" cy="24" r="42"/>
+          <circle cx="24" cy="24" r="60"/>
+          <circle cx="24" cy="24" r="78"/>
+          <circle cx="24" cy="24" r="96"/>
+        </svg>
+        <p class="eyebrow">Minneapolis — Saint&nbsp;Paul</p>
+        <h1 class="wordmark">Within&nbsp;reach</h1>
+        <p class="lede">Drop a point and watch the reach ripple out, minute by minute — routed on real streets and trails, and bent by the river.</p>
+      </div>
 
       <!-- mode -->
       <label class="label" for="modeSeg">Travel mode</label>
@@ -355,7 +428,7 @@
         </div>
       </div>
 
-      <div class="divider"></div>
+      <div class="divider contour"></div>
 
       <!-- readout / legend -->
       <div id="readout">
@@ -369,7 +442,7 @@
 
       <!-- key gate -->
       <div class="gate" id="gate">
-        <div class="divider"></div>
+        <div class="divider contour"></div>
         <span class="label">Routing key</span>
         <p>This map computes real reach using <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener">OpenRouteService</a> (OpenStreetMap data). Paste a free key to begin — the free tier allows ~2,000 lookups a day.</p>
         <div class="keyrow">
@@ -378,11 +451,11 @@
         </div>
       </div>
 
-      <div class="divider"></div>
+      <div class="divider contour"></div>
 
       <!-- about / method -->
       <details class="about">
-        <summary>About the data</summary>
+        <summary>Why the contours bend</summary>
         <div class="about-body">
           <p>Reach is computed by <b>OpenRouteService</b>, which routes over the live <b>OpenStreetMap</b> network and returns the area you can actually reach within each time band — not a circle drawn from average speed.</p>
           <p>Walking is modelled at roughly <span class="mono">5&nbsp;km/h</span>. Cycling speed depends on the way: about <span class="mono">18&nbsp;km/h</span> on cycleways and quiet residential streets, slower on rough paths, faster downhill.</p>
@@ -438,12 +511,12 @@ busy:false };
   map.createPane("lbl");    map.getPane("lbl").style.zIndex = 450;
   map.getPane("lbl").style.pointerEvents = "none";
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png", {
     attribution:'&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a> · routing <a href="https://openrouteservice.org">ORS</a>',
     subdomains:"abcd", maxZoom:19
   }).addTo(map);
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png", {
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png", {
     pane:"lbl", subdomains:"abcd", maxZoom:19
   }).addTo(map);
 
@@ -472,13 +545,13 @@ busy:false };
   /* ---------------- key handling (session only) ---------------- */
   function renderGate(){
     if(state.key){
-      gate.innerHTML = `<div class="divider"></div>
+      gate.innerHTML = `<div class="divider contour"></div>
         <span class="label">Routing key</span>
         <div class="key-ok"><span class="dot" style="background:#2a8f7d"></span>
         Key active for this session. <button id="keyChange">Change</button></div>`;
       $("keyChange").addEventListener("click", ()=>{ state.key=""; renderGate(); setStatus("Add a routing key to compute reach"); });
     }else{
-      gate.innerHTML = `<div class="divider"></div>
+      gate.innerHTML = `<div class="divider contour"></div>
         <span class="label">Routing key</span>
         <p>This map computes real reach using <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener">OpenRouteService</a> (OpenStreetMap data). Paste a free key to begin — the free tier allows ~2,000 lookups a day.</p>
         <div class="keyrow">
@@ -601,7 +674,7 @@ busy:false };
     try{
       const res = await fetch("https://api.openrouteservice.org/v2/isochrones/"+PROFILE[state.mode], {
         method:"POST", signal:abortCtl.signal,
-        headers:{ "Authorization":state.key, "Content-Type":"application/json", "Accept":"application/json" },
+        headers:{ "Authorization":state.key, "Content-Type":"application/json", "Accept":"application/geo+json" },
         body: JSON.stringify(body)
       });
 
