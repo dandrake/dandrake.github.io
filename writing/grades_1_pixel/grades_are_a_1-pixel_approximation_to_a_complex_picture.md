@@ -151,6 +151,8 @@ Strangely, though, I wasn't thinking of that when I got the idea for this -- it 
 *Trust in Numbers: The Pursuit of Objectivity in Science and Public Life* by Theodore Porter, and
 *All Data Are Local: Thinking Critically in a Data-Driven Society* by Yanni Loukissas. Both really give you a sense for this process of taking complex, nuanced things and squeezing them down into something legible, portable, and simple. Sometimes that's okay, but all too often it's not.
 
+For more on how computer scientists view the problems with grades: Jordan Freitas wrote a pretty compelling piece for ITiCSE 2025: [Grades are Bugs](https://dl.acm.org/doi/10.1145/3724363.3729071). Grades are a form of legacy code, she argues, that are riddled with syntax, runtime, and semantic bugs.
+
 For a start on the problems with grades, see Josh Eyler's *Failing Our Future*, and so many other related books in the alternative grading space, as well as so many writings by [Robert Talbert](https://www.rtalbert.org/).
 
 The 14 colors above were inspired by the 20-ish ones at <https://sashamaps.net/docs/resources/20-colors/>.
